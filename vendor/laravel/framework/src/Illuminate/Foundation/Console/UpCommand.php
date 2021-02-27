@@ -29,17 +29,13 @@ class UpCommand extends Command
     public function handle()
     {
         try {
-            if (! is_file(storage_path('framework/down'))) {
+            if (! file_exists(storage_path('framework/down'))) {
                 $this->comment('Application is already up.');
 
-                return 0;
+                return true;
             }
 
             unlink(storage_path('framework/down'));
-
-            if (is_file(storage_path('framework/maintenance.php'))) {
-                unlink(storage_path('framework/maintenance.php'));
-            }
 
             $this->info('Application is now live.');
         } catch (Exception $e) {

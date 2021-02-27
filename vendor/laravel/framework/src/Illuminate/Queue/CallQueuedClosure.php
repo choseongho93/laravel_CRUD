@@ -3,7 +3,6 @@
 namespace Illuminate\Queue;
 
 use Closure;
-use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +11,7 @@ use ReflectionFunction;
 
 class CallQueuedClosure implements ShouldQueue
 {
-    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * The serializable Closure instance.
@@ -20,13 +19,6 @@ class CallQueuedClosure implements ShouldQueue
      * @var \Illuminate\Queue\SerializableClosure
      */
     public $closure;
-
-    /**
-     * The callbacks that should be executed on failure.
-     *
-     * @var array
-     */
-    public $failureCallbacks = [];
 
     /**
      * Indicate if the job should be deleted when models are missing.
@@ -65,35 +57,7 @@ class CallQueuedClosure implements ShouldQueue
      */
     public function handle(Container $container)
     {
-        $container->call($this->closure->getClosure(), ['job' => $this]);
-    }
-
-    /**
-     * Add a callback to be executed if the job fails.
-     *
-     * @param  callable  $callback
-     * @return $this
-     */
-    public function onFailure($callback)
-    {
-        $this->failureCallbacks[] = $callback instanceof Closure
-                        ? new SerializableClosure($callback)
-                        : $callback;
-
-        return $this;
-    }
-
-    /**
-     * Handle a job failure.
-     *
-     * @param  \Throwable  $e
-     * @return void
-     */
-    public function failed($e)
-    {
-        foreach ($this->failureCallbacks as $callback) {
-            call_user_func($callback instanceof SerializableClosure ? $callback->getClosure() : $callback, $e);
-        }
+        $container->call($this->closure->getClosure());
     }
 
     /**

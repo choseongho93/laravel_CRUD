@@ -3,7 +3,6 @@
 namespace Illuminate\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
@@ -51,13 +50,6 @@ class SendQueuedNotifications implements ShouldQueue
     public $timeout;
 
     /**
-     * Indicates if the job should be encrypted.
-     *
-     * @var bool
-     */
-    public $shouldBeEncrypted = false;
-
-    /**
      * Create a new job instance.
      *
      * @param  \Illuminate\Notifications\Notifiable|\Illuminate\Support\Collection  $notifiables
@@ -72,8 +64,6 @@ class SendQueuedNotifications implements ShouldQueue
         $this->notifiables = $this->wrapNotifiables($notifiables);
         $this->tries = property_exists($notification, 'tries') ? $notification->tries : null;
         $this->timeout = property_exists($notification, 'timeout') ? $notification->timeout : null;
-        $this->afterCommit = property_exists($notification, 'afterCommit') ? $notification->afterCommit : null;
-        $this->shouldBeEncrypted = $notification instanceof ShouldBeEncrypted;
     }
 
     /**
@@ -128,17 +118,17 @@ class SendQueuedNotifications implements ShouldQueue
     }
 
     /**
-     * Get the number of seconds before a released notification will be available.
+     * Get the retry delay for the notification.
      *
      * @return mixed
      */
-    public function backoff()
+    public function retryAfter()
     {
-        if (! method_exists($this->notification, 'backoff') && ! isset($this->notification->backoff)) {
+        if (! method_exists($this->notification, 'retryAfter') && ! isset($this->notification->retryAfter)) {
             return;
         }
 
-        return $this->notification->backoff ?? $this->notification->backoff();
+        return $this->notification->retryAfter ?? $this->notification->retryAfter();
     }
 
     /**
@@ -148,11 +138,11 @@ class SendQueuedNotifications implements ShouldQueue
      */
     public function retryUntil()
     {
-        if (! method_exists($this->notification, 'retryUntil') && ! isset($this->notification->retryUntil)) {
+        if (! method_exists($this->notification, 'retryUntil') && ! isset($this->notification->timeoutAt)) {
             return;
         }
 
-        return $this->notification->retryUntil ?? $this->notification->retryUntil();
+        return $this->notification->timeoutAt ?? $this->notification->retryUntil();
     }
 
     /**

@@ -1,91 +1,56 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Dotenv\Repository\Adapter;
 
-use PhpOption\None;
 use PhpOption\Option;
-use PhpOption\Some;
 
-final class PutenvAdapter implements AdapterInterface
+class PutenvAdapter implements AvailabilityInterface, ReaderInterface, WriterInterface
 {
-    /**
-     * Create a new putenv adapter instance.
-     *
-     * @return void
-     */
-    private function __construct()
-    {
-        //
-    }
-
-    /**
-     * Create a new instance of the adapter, if it is available.
-     *
-     * @return \PhpOption\Option<\Dotenv\Repository\Adapter\AdapterInterface>
-     */
-    public static function create()
-    {
-        if (self::isSupported()) {
-            /** @var \PhpOption\Option<AdapterInterface> */
-            return Some::create(new self());
-        }
-
-        return None::create();
-    }
-
     /**
      * Determines if the adapter is supported.
      *
      * @return bool
      */
-    private static function isSupported()
+    public function isSupported()
     {
-        return \function_exists('getenv') && \function_exists('putenv');
+        return function_exists('getenv') && function_exists('putenv');
     }
 
     /**
-     * Read an environment variable, if it exists.
+     * Get an environment variable, if it exists.
      *
      * @param string $name
      *
-     * @return \PhpOption\Option<string>
+     * @return \PhpOption\Option<string|null>
      */
-    public function read(string $name)
+    public function get($name)
     {
-        /** @var \PhpOption\Option<string> */
-        return Option::fromValue(\getenv($name), false)->filter(static function ($value) {
-            return \is_string($value);
-        });
+        /** @var \PhpOption\Option<string|null> */
+        return Option::fromValue(getenv($name), false);
     }
 
     /**
-     * Write to an environment variable, if possible.
+     * Set an environment variable.
      *
-     * @param string $name
-     * @param string $value
+     * @param string      $name
+     * @param string|null $value
      *
-     * @return bool
+     * @return void
      */
-    public function write(string $name, string $value)
+    public function set($name, $value = null)
     {
-        \putenv("$name=$value");
-
-        return true;
+        putenv("$name=$value");
     }
 
     /**
-     * Delete an environment variable, if possible.
+     * Clear an environment variable.
      *
      * @param string $name
      *
-     * @return bool
+     * @return void
      */
-    public function delete(string $name)
+    public function clear($name)
     {
-        \putenv($name);
-
-        return true;
+        putenv($name);
     }
 }

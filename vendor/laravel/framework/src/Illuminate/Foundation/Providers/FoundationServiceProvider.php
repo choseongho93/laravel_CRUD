@@ -5,7 +5,6 @@ namespace Illuminate\Foundation\Providers;
 use Illuminate\Http\Request;
 use Illuminate\Support\AggregateServiceProvider;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Testing\ParallelTestingServiceProvider;
 use Illuminate\Validation\ValidationException;
 
 class FoundationServiceProvider extends AggregateServiceProvider
@@ -13,11 +12,10 @@ class FoundationServiceProvider extends AggregateServiceProvider
     /**
      * The provider class names.
      *
-     * @var string[]
+     * @var array
      */
     protected $providers = [
         FormRequestServiceProvider::class,
-        ParallelTestingServiceProvider::class,
     ];
 
     /**
@@ -80,10 +78,6 @@ class FoundationServiceProvider extends AggregateServiceProvider
     {
         Request::macro('hasValidSignature', function ($absolute = true) {
             return URL::hasValidSignature($this, $absolute);
-        });
-
-        Request::macro('hasValidRelativeSignature', function () {
-            return URL::hasValidSignature($this, $absolute = false);
         });
     }
 }

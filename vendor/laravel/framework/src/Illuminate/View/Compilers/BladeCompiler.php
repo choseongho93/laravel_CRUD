@@ -62,7 +62,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     /**
      * All of the available compiler functions.
      *
-     * @var string[]
+     * @var array
      */
     protected $compilers = [
         // 'Comments',
@@ -74,21 +74,21 @@ class BladeCompiler extends Compiler implements CompilerInterface
     /**
      * Array of opening and closing tags for raw echos.
      *
-     * @var string[]
+     * @var array
      */
     protected $rawTags = ['{!!', '!!}'];
 
     /**
      * Array of opening and closing tags for regular echos.
      *
-     * @var string[]
+     * @var array
      */
     protected $contentTags = ['{{', '}}'];
 
     /**
      * Array of opening and closing tags for escaped echos.
      *
-     * @var string[]
+     * @var array
      */
     protected $escapedTags = ['{{{', '}}}'];
 
@@ -100,7 +100,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     protected $echoFormat = 'e(%s)';
 
     /**
-     * Array of footer lines to be added to the template.
+     * Array of footer lines to be added to template.
      *
      * @var array
      */
@@ -119,13 +119,6 @@ class BladeCompiler extends Compiler implements CompilerInterface
      * @var array
      */
     protected $classComponentAliases = [];
-
-    /**
-     * The array of class component namespaces to autoload from.
-     *
-     * @var array
-     */
-    protected $classComponentNamespaces = [];
 
     /**
      * Indicates if component tags should be compiled.
@@ -251,10 +244,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
             $result = $this->addFooters($result);
         }
 
-        return str_replace(
-            ['##BEGIN-COMPONENT-CLASS##', '##END-COMPONENT-CLASS##'],
-            '',
-            $result);
+        return $result;
     }
 
     /**
@@ -328,7 +318,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
         }
 
         return (new ComponentTagCompiler(
-            $this->classComponentAliases, $this->classComponentNamespaces, $this
+            $this->classComponentAliases, $this
         ))->compile($value);
     }
 
@@ -449,8 +439,6 @@ class BladeCompiler extends Compiler implements CompilerInterface
      */
     protected function callCustomDirective($name, $value)
     {
-        $value = $value ?? '';
-
         if (Str::startsWith($value, '(') && Str::endsWith($value, ')')) {
             $value = Str::substr($value, 1, -1);
         }
@@ -580,9 +568,9 @@ class BladeCompiler extends Compiler implements CompilerInterface
     {
         foreach ($components as $key => $value) {
             if (is_numeric($key)) {
-                $this->component($value, null, $prefix);
+                static::component($value, null, $prefix);
             } else {
-                $this->component($key, $value, $prefix);
+                static::component($key, $value, $prefix);
             }
         }
     }
@@ -595,28 +583,6 @@ class BladeCompiler extends Compiler implements CompilerInterface
     public function getClassComponentAliases()
     {
         return $this->classComponentAliases;
-    }
-
-    /**
-     * Register a class-based component namespace.
-     *
-     * @param  string  $namespace
-     * @param  string  $prefix
-     * @return void
-     */
-    public function componentNamespace($namespace, $prefix)
-    {
-        $this->classComponentNamespaces[$prefix] = $namespace;
-    }
-
-    /**
-     * Get the registered class component namespaces.
-     *
-     * @return array
-     */
-    public function getClassComponentNamespaces()
-    {
-        return $this->classComponentNamespaces;
     }
 
     /**
@@ -650,7 +616,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
      */
     public function include($path, $alias = null)
     {
-        $this->aliasInclude($path, $alias);
+        return $this->aliasInclude($path, $alias);
     }
 
     /**

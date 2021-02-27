@@ -4,13 +4,11 @@ namespace Illuminate\Support;
 
 use Closure;
 use Illuminate\Support\Traits\Macroable;
-use Illuminate\Support\Traits\Tappable;
-use JsonSerializable;
 use Symfony\Component\VarDumper\VarDumper;
 
-class Stringable implements JsonSerializable
+class Stringable
 {
-    use Macroable, Tappable;
+    use Macroable;
 
     /**
      * The underlying string value.
@@ -83,16 +81,6 @@ class Stringable implements JsonSerializable
     public function basename($suffix = '')
     {
         return new static(basename($this->value, $suffix));
-    }
-
-    /**
-     * Get the basename of the class path.
-     *
-     * @return static
-     */
-    public function classBasename()
-    {
-        return new static(class_basename($this->value));
     }
 
     /**
@@ -207,19 +195,15 @@ class Stringable implements JsonSerializable
     }
 
     /**
-     * Split a string using a regular expression or by length.
+     * Split a string using a regular expression.
      *
-     * @param  string|int  $pattern
+     * @param  string  $pattern
      * @param  int  $limit
      * @param  int  $flags
      * @return \Illuminate\Support\Collection
      */
     public function split($pattern, $limit = -1, $flags = 0)
     {
-        if (filter_var($pattern, FILTER_VALIDATE_INT) !== false) {
-            return collect(mb_str_split($this->value, $pattern));
-        }
-
         $segments = preg_split($pattern, $this->value, $limit, $flags);
 
         return ! empty($segments) ? collect($segments) : collect();
@@ -321,17 +305,6 @@ class Stringable implements JsonSerializable
     }
 
     /**
-     * Convert GitHub flavored Markdown into HTML.
-     *
-     * @param  array  $options
-     * @return string
-     */
-    public function markdown(array $options = [])
-    {
-        return new static(Str::markdown($this->value, $options));
-    }
-
-    /**
      * Get the string matching the given pattern.
      *
      * @param  string  $pattern
@@ -410,17 +383,6 @@ class Stringable implements JsonSerializable
     public function parseCallback($default = null)
     {
         return Str::parseCallback($this->value, $default);
-    }
-
-    /**
-     * Call the given callback and return a new string.
-     *
-     * @param callable $callback
-     * @return static
-     */
-    public function pipe(callable $callback)
-    {
-        return new static(call_user_func($callback, $this));
     }
 
     /**
@@ -607,7 +569,7 @@ class Stringable implements JsonSerializable
     }
 
     /**
-     * Returns the portion of the string specified by the start and length parameters.
+     * Returns the portion of string specified by the start and length parameters.
      *
      * @param  int  $start
      * @param  int|null  $length
@@ -744,16 +706,6 @@ class Stringable implements JsonSerializable
         $this->dump();
 
         exit(1);
-    }
-
-    /**
-     * Convert the object to a string when JSON encoded.
-     *
-     * @return string
-     */
-    public function jsonSerialize()
-    {
-        return $this->__toString();
     }
 
     /**

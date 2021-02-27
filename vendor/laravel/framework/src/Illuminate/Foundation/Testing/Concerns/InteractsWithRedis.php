@@ -57,7 +57,6 @@ trait InteractsWithRedis
                     'port' => $port,
                     'database' => 5,
                     'timeout' => 0.5,
-                    'name' => 'default',
                 ],
             ]);
         }

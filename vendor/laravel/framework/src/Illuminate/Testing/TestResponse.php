@@ -234,7 +234,7 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Asserts that the response does not contain the given header.
+     * Asserts that the response does not contains the given header.
      *
      * @param  string  $headerName
      * @return $this
@@ -327,7 +327,7 @@ class TestResponse implements ArrayAccess
         $expiresAt = Carbon::createFromTimestamp($cookie->getExpiresTime());
 
         PHPUnit::assertTrue(
-            0 !== $cookie->getExpiresTime() && $expiresAt->lessThan(Carbon::now()),
+            $expiresAt->lessThan(Carbon::now()),
             "Cookie [{$cookieName}] is not expired, it expires at [{$expiresAt}]."
         );
 
@@ -350,7 +350,7 @@ class TestResponse implements ArrayAccess
         $expiresAt = Carbon::createFromTimestamp($cookie->getExpiresTime());
 
         PHPUnit::assertTrue(
-            0 === $cookie->getExpiresTime() || $expiresAt->greaterThan(Carbon::now()),
+            $expiresAt->greaterThan(Carbon::now()),
             "Cookie [{$cookieName}] is expired, it expired at [{$expiresAt}]."
         );
 
@@ -358,7 +358,7 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Asserts that the response does not contain the given cookie.
+     * Asserts that the response does not contains the given cookie.
      *
      * @param  string  $cookieName
      * @return $this
@@ -389,21 +389,17 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Assert that the given string or array of strings are contained within the response.
+     * Assert that the given string is contained within the response.
      *
-     * @param  string|array  $value
+     * @param  string  $value
      * @param  bool  $escape
      * @return $this
      */
     public function assertSee($value, $escape = true)
     {
-        $value = Arr::wrap($value);
+        $value = $escape ? e($value) : $value;
 
-        $values = $escape ? array_map('e', ($value)) : $value;
-
-        foreach ($values as $value) {
-            PHPUnit::assertStringContainsString((string) $value, $this->getContent());
-        }
+        PHPUnit::assertStringContainsString((string) $value, $this->getContent());
 
         return $this;
     }
@@ -425,23 +421,17 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Assert that the given string or array of strings are contained within the response text.
+     * Assert that the given string is contained within the response text.
      *
-     * @param  string|array  $value
+     * @param  string  $value
      * @param  bool  $escape
      * @return $this
      */
     public function assertSeeText($value, $escape = true)
     {
-        $value = Arr::wrap($value);
+        $value = $escape ? e($value) : $value;
 
-        $values = $escape ? array_map('e', ($value)) : $value;
-
-        tap(strip_tags($this->getContent()), function ($content) use ($values) {
-            foreach ($values as $value) {
-                PHPUnit::assertStringContainsString((string) $value, $content);
-            }
-        });
+        PHPUnit::assertStringContainsString((string) $value, strip_tags($this->getContent()));
 
         return $this;
     }
@@ -463,43 +453,33 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Assert that the given string or array of strings are not contained within the response.
+     * Assert that the given string is not contained within the response.
      *
-     * @param  string|array  $value
+     * @param  string  $value
      * @param  bool  $escape
      * @return $this
      */
     public function assertDontSee($value, $escape = true)
     {
-        $value = Arr::wrap($value);
+        $value = $escape ? e($value) : $value;
 
-        $values = $escape ? array_map('e', ($value)) : $value;
-
-        foreach ($values as $value) {
-            PHPUnit::assertStringNotContainsString((string) $value, $this->getContent());
-        }
+        PHPUnit::assertStringNotContainsString((string) $value, $this->getContent());
 
         return $this;
     }
 
     /**
-     * Assert that the given string or array of strings are not contained within the response text.
+     * Assert that the given string is not contained within the response text.
      *
-     * @param  string|array  $value
+     * @param  string  $value
      * @param  bool  $escape
      * @return $this
      */
     public function assertDontSeeText($value, $escape = true)
     {
-        $value = Arr::wrap($value);
+        $value = $escape ? e($value) : $value;
 
-        $values = $escape ? array_map('e', ($value)) : $value;
-
-        tap(strip_tags($this->getContent()), function ($content) use ($values) {
-            foreach ($values as $value) {
-                PHPUnit::assertStringNotContainsString((string) $value, $content);
-            }
-        });
+        PHPUnit::assertStringNotContainsString((string) $value, strip_tags($this->getContent()));
 
         return $this;
     }
@@ -513,9 +493,29 @@ class TestResponse implements ArrayAccess
      */
     public function assertJson(array $data, $strict = false)
     {
-        $this->decodeResponseJson()->assertSubset($data, $strict);
+        PHPUnit::assertArraySubset(
+            $data, $this->decodeResponseJson(), $strict, $this->assertJsonMessage($data)
+        );
 
         return $this;
+    }
+
+    /**
+     * Get the assertion message for assertJson.
+     *
+     * @param  array  $data
+     * @return string
+     */
+    protected function assertJsonMessage(array $data)
+    {
+        $expected = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $actual = json_encode($this->decodeResponseJson(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        return 'Unable to find JSON: '.PHP_EOL.PHP_EOL.
+            "[{$expected}]".PHP_EOL.PHP_EOL.
+            'within response JSON:'.PHP_EOL.PHP_EOL.
+            "[{$actual}].".PHP_EOL.PHP_EOL;
     }
 
     /**
@@ -527,7 +527,7 @@ class TestResponse implements ArrayAccess
      */
     public function assertJsonPath($path, $expect)
     {
-        $this->decodeResponseJson()->assertPath($path, $expect);
+        PHPUnit::assertSame($expect, $this->json($path));
 
         return $this;
     }
@@ -540,20 +540,11 @@ class TestResponse implements ArrayAccess
      */
     public function assertExactJson(array $data)
     {
-        $this->decodeResponseJson()->assertExact($data);
+        $actual = json_encode(Arr::sortRecursive(
+            (array) $this->decodeResponseJson()
+        ));
 
-        return $this;
-    }
-
-    /**
-     * Assert that the response has the similar JSON as given.
-     *
-     * @param  array  $data
-     * @return $this
-     */
-    public function assertSimilarJson(array $data)
-    {
-        $this->decodeResponseJson()->assertSimilar($data);
+        PHPUnit::assertEquals(json_encode(Arr::sortRecursive($data)), $actual);
 
         return $this;
     }
@@ -566,7 +557,21 @@ class TestResponse implements ArrayAccess
      */
     public function assertJsonFragment(array $data)
     {
-        $this->decodeResponseJson()->assertFragment($data);
+        $actual = json_encode(Arr::sortRecursive(
+            (array) $this->decodeResponseJson()
+        ));
+
+        foreach (Arr::sortRecursive($data) as $key => $value) {
+            $expected = $this->jsonSearchStrings($key, $value);
+
+            PHPUnit::assertTrue(
+                Str::contains($actual, $expected),
+                'Unable to find JSON fragment: '.PHP_EOL.PHP_EOL.
+                '['.json_encode([$key => $value]).']'.PHP_EOL.PHP_EOL.
+                'within'.PHP_EOL.PHP_EOL.
+                "[{$actual}]."
+            );
+        }
 
         return $this;
     }
@@ -580,7 +585,25 @@ class TestResponse implements ArrayAccess
      */
     public function assertJsonMissing(array $data, $exact = false)
     {
-        $this->decodeResponseJson()->assertMissing($data, $exact);
+        if ($exact) {
+            return $this->assertJsonMissingExact($data);
+        }
+
+        $actual = json_encode(Arr::sortRecursive(
+            (array) $this->decodeResponseJson()
+        ));
+
+        foreach (Arr::sortRecursive($data) as $key => $value) {
+            $unexpected = $this->jsonSearchStrings($key, $value);
+
+            PHPUnit::assertFalse(
+                Str::contains($actual, $unexpected),
+                'Found unexpected JSON fragment: '.PHP_EOL.PHP_EOL.
+                '['.json_encode([$key => $value]).']'.PHP_EOL.PHP_EOL.
+                'within'.PHP_EOL.PHP_EOL.
+                "[{$actual}]."
+            );
+        }
 
         return $this;
     }
@@ -593,9 +616,42 @@ class TestResponse implements ArrayAccess
      */
     public function assertJsonMissingExact(array $data)
     {
-        $this->decodeResponseJson()->assertMissingExact($data);
+        $actual = json_encode(Arr::sortRecursive(
+            (array) $this->decodeResponseJson()
+        ));
 
-        return $this;
+        foreach (Arr::sortRecursive($data) as $key => $value) {
+            $unexpected = $this->jsonSearchStrings($key, $value);
+
+            if (! Str::contains($actual, $unexpected)) {
+                return $this;
+            }
+        }
+
+        PHPUnit::fail(
+            'Found unexpected JSON fragment: '.PHP_EOL.PHP_EOL.
+            '['.json_encode($data).']'.PHP_EOL.PHP_EOL.
+            'within'.PHP_EOL.PHP_EOL.
+            "[{$actual}]."
+        );
+    }
+
+    /**
+     * Get the strings we need to search for when examining the JSON.
+     *
+     * @param  string  $key
+     * @param  string  $value
+     * @return array
+     */
+    protected function jsonSearchStrings($key, $value)
+    {
+        $needle = substr(json_encode([$key => $value]), 1, -1);
+
+        return [
+            $needle.']',
+            $needle.'}',
+            $needle.',',
+        ];
     }
 
     /**
@@ -607,7 +663,29 @@ class TestResponse implements ArrayAccess
      */
     public function assertJsonStructure(array $structure = null, $responseData = null)
     {
-        $this->decodeResponseJson()->assertStructure($structure, $responseData);
+        if (is_null($structure)) {
+            return $this->assertExactJson($this->json());
+        }
+
+        if (is_null($responseData)) {
+            $responseData = $this->decodeResponseJson();
+        }
+
+        foreach ($structure as $key => $value) {
+            if (is_array($value) && $key === '*') {
+                PHPUnit::assertIsArray($responseData);
+
+                foreach ($responseData as $responseDataItem) {
+                    $this->assertJsonStructure($structure['*'], $responseDataItem);
+                }
+            } elseif (is_array($value)) {
+                PHPUnit::assertArrayHasKey($key, $responseData);
+
+                $this->assertJsonStructure($structure[$key], $responseData[$key]);
+            } else {
+                PHPUnit::assertArrayHasKey($value, $responseData);
+            }
+        }
 
         return $this;
     }
@@ -621,7 +699,19 @@ class TestResponse implements ArrayAccess
      */
     public function assertJsonCount(int $count, $key = null)
     {
-        $this->decodeResponseJson()->assertCount($count, $key);
+        if (! is_null($key)) {
+            PHPUnit::assertCount(
+                $count, data_get($this->json(), $key),
+                "Failed to assert that the response count matched the expected {$count}"
+            );
+
+            return $this;
+        }
+
+        PHPUnit::assertCount($count,
+            $this->json(),
+            "Failed to assert that the response count matched the expected {$count}"
+        );
 
         return $this;
     }
@@ -692,13 +782,13 @@ class TestResponse implements ArrayAccess
 
         $json = $this->json();
 
-        if (! Arr::has($json, $responseKey)) {
-            PHPUnit::assertTrue(true);
+        if (! array_key_exists($responseKey, $json)) {
+            PHPUnit::assertArrayNotHasKey($responseKey, $json);
 
             return $this;
         }
 
-        $errors = Arr::get($json, $responseKey, []);
+        $errors = $json[$responseKey];
 
         if (is_null($keys) && count($errors) > 0) {
             PHPUnit::fail(
@@ -720,15 +810,14 @@ class TestResponse implements ArrayAccess
     /**
      * Validate and return the decoded response JSON.
      *
-     * @return \Illuminate\Testing\AssertableJsonString
+     * @param  string|null  $key
+     * @return mixed
      *
      * @throws \Throwable
      */
-    public function decodeResponseJson()
+    public function decodeResponseJson($key = null)
     {
-        $testJson = new AssertableJsonString($this->getContent());
-
-        $decodedResponse = $testJson->json();
+        $decodedResponse = json_decode($this->getContent(), true);
 
         if (is_null($decodedResponse) || $decodedResponse === false) {
             if ($this->exception) {
@@ -738,7 +827,7 @@ class TestResponse implements ArrayAccess
             }
         }
 
-        return $testJson;
+        return data_get($decodedResponse, $key);
     }
 
     /**
@@ -749,7 +838,7 @@ class TestResponse implements ArrayAccess
      */
     public function json($key = null)
     {
-        return $this->decodeResponseJson()->json($key);
+        return $this->decodeResponseJson($key);
     }
 
     /**

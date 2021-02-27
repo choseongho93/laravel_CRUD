@@ -105,20 +105,6 @@ trait ReplacesAttributes
     }
 
     /**
-     * Replace all place-holders for the multiple_of rule.
-     *
-     * @param  string  $message
-     * @param  string  $attribute
-     * @param  string  $rule
-     * @param  array  $parameters
-     * @return string
-     */
-    protected function replaceMultipleOf($message, $attribute, $rule, $parameters)
-    {
-        return str_replace(':value', $parameters[0], $message);
-    }
-
-    /**
      * Replace all place-holders for the in rule.
      *
      * @param  string  $message

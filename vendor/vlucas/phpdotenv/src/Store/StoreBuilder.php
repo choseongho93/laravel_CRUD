@@ -1,20 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Dotenv\Store;
 
 use Dotenv\Store\File\Paths;
 
-final class StoreBuilder
+class StoreBuilder
 {
-    /**
-     * The of default name.
-     *
-     * @var string[]
-     */
-    private const DEFAULT_NAME = '.env';
-
     /**
      * The paths to search within.
      *
@@ -25,7 +16,7 @@ final class StoreBuilder
     /**
      * The file names to search for.
      *
-     * @var string[]
+     * @var string[]|null
      */
     private $names;
 
@@ -34,75 +25,56 @@ final class StoreBuilder
      *
      * @var bool
      */
-    private $shortCircuit;
-
-    /**
-     * The file encoding.
-     *
-     * @var string|null
-     */
-    private $fileEncoding;
+    protected $shortCircuit;
 
     /**
      * Create a new store builder instance.
      *
-     * @param string[]    $paths
-     * @param string[]    $names
-     * @param bool        $shortCircuit
-     * @param string|null $fileEncoding
+     * @param string[]      $paths
+     * @param string[]|null $names
+     * @param bool          $shortCircuit
      *
      * @return void
      */
-    private function __construct(array $paths = [], array $names = [], bool $shortCircuit = false, string $fileEncoding = null)
+    private function __construct(array $paths = [], array $names = null, $shortCircuit = false)
     {
         $this->paths = $paths;
         $this->names = $names;
         $this->shortCircuit = $shortCircuit;
-        $this->fileEncoding = $fileEncoding;
     }
 
     /**
-     * Create a new store builder instance with no names.
+     * Create a new store builder instance.
      *
      * @return \Dotenv\Store\StoreBuilder
      */
-    public static function createWithNoNames()
+    public static function create()
     {
         return new self();
     }
 
     /**
-     * Create a new store builder instance with the default name.
+     * Creates a store builder with the given paths.
+     *
+     * @param string|string[] $paths
      *
      * @return \Dotenv\Store\StoreBuilder
      */
-    public static function createWithDefaultName()
+    public function withPaths($paths)
     {
-        return new self([], [self::DEFAULT_NAME]);
+        return new self((array) $paths, $this->names, $this->shortCircuit);
     }
 
     /**
-     * Creates a store builder with the given path added.
+     * Creates a store builder with the given names.
      *
-     * @param string $path
-     *
-     * @return \Dotenv\Store\StoreBuilder
-     */
-    public function addPath(string $path)
-    {
-        return new self(\array_merge($this->paths, [$path]), $this->names, $this->shortCircuit, $this->fileEncoding);
-    }
-
-    /**
-     * Creates a store builder with the given name added.
-     *
-     * @param string $name
+     * @param string|string[]|null $names
      *
      * @return \Dotenv\Store\StoreBuilder
      */
-    public function addName(string $name)
+    public function withNames($names = null)
     {
-        return new self($this->paths, \array_merge($this->names, [$name]), $this->shortCircuit, $this->fileEncoding);
+        return new self($this->paths, $names === null ? null : (array) $names, $this->shortCircuit);
     }
 
     /**
@@ -112,19 +84,7 @@ final class StoreBuilder
      */
     public function shortCircuit()
     {
-        return new self($this->paths, $this->names, true, $this->fileEncoding);
-    }
-
-    /**
-     * Creates a store builder with the specified file encoding.
-     *
-     * @param string|null $fileEncoding
-     *
-     * @return \Dotenv\Store\StoreBuilder
-     */
-    public function fileEncoding(string $fileEncoding = null)
-    {
-        return new self($this->paths, $this->names, $this->shortCircuit, $fileEncoding);
+        return new self($this->paths, $this->names, true);
     }
 
     /**
@@ -135,9 +95,8 @@ final class StoreBuilder
     public function make()
     {
         return new FileStore(
-            Paths::filePaths($this->paths, $this->names),
-            $this->shortCircuit,
-            $this->fileEncoding
+            Paths::filePaths($this->paths, $this->names === null ? ['.env'] : $this->names),
+            $this->shortCircuit
         );
     }
 }

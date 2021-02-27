@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of Collision.
  *
@@ -16,9 +14,11 @@ namespace NunoMaduro\Collision\Adapters\Laravel;
 use Whoops\Exception\Inspector as BaseInspector;
 
 /**
- * @internal
+ * This is an Collision Laravel Adapter Inspector implementation.
+ *
+ * @author Nuno Maduro <enunomaduro@gmail.com>
  */
-final class Inspector extends BaseInspector
+class Inspector extends BaseInspector
 {
     /**
      * {@inheritdoc}

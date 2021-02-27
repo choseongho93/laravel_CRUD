@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Dotenv\Store;
 
 final class StringStore implements StoreInterface
@@ -20,7 +18,7 @@ final class StringStore implements StoreInterface
      *
      * @return void
      */
-    public function __construct(string $content)
+    public function __construct($content)
     {
         $this->content = $content;
     }

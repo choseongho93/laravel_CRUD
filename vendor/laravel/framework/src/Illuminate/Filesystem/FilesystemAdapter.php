@@ -20,7 +20,6 @@ use League\Flysystem\Cached\CachedAdapter;
 use League\Flysystem\FileExistsException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
-use League\Flysystem\Sftp\SftpAdapter as Sftp;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
@@ -53,10 +52,9 @@ class FilesystemAdapter implements CloudFilesystemContract
      * Assert that the given file exists.
      *
      * @param  string|array  $path
-     * @param  string|null  $content
      * @return $this
      */
-    public function assertExists($path, $content = null)
+    public function assertExists($path)
     {
         $paths = Arr::wrap($path);
 
@@ -64,16 +62,6 @@ class FilesystemAdapter implements CloudFilesystemContract
             PHPUnit::assertTrue(
                 $this->exists($path), "Unable to find a file at path [{$path}]."
             );
-
-            if (! is_null($content)) {
-                $actual = $this->get($path);
-
-                PHPUnit::assertSame(
-                    $content,
-                    $actual,
-                    "File [{$path}] was found, but content [{$actual}] does not match [{$content}]."
-                );
-            }
         }
 
         return $this;
@@ -450,7 +438,7 @@ class FilesystemAdapter implements CloudFilesystemContract
             return $this->driver->getUrl($path);
         } elseif ($adapter instanceof AwsS3Adapter) {
             return $this->getAwsUrl($adapter, $path);
-        } elseif ($adapter instanceof Ftp || $adapter instanceof Sftp) {
+        } elseif ($adapter instanceof Ftp) {
             return $this->getFtpUrl($path);
         } elseif ($adapter instanceof LocalAdapter) {
             return $this->getLocalUrl($path);

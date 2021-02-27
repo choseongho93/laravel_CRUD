@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Dotenv\Loader;
 
 use Dotenv\Repository\RepositoryInterface;
@@ -9,12 +7,14 @@ use Dotenv\Repository\RepositoryInterface;
 interface LoaderInterface
 {
     /**
-     * Load the given entries into the repository.
+     * Load the given environment file content into the repository.
      *
      * @param \Dotenv\Repository\RepositoryInterface $repository
-     * @param \Dotenv\Parser\Entry[]                 $entries
+     * @param string                                 $content
+     *
+     * @throws \Dotenv\Exception\InvalidFileException
      *
      * @return array<string,string|null>
      */
-    public function load(RepositoryInterface $repository, array $entries);
+    public function load(RepositoryInterface $repository, $content);
 }

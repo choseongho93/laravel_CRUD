@@ -16,7 +16,7 @@ class ResourceRegistrar
     /**
      * The default actions for a resourceful controller.
      *
-     * @var string[]
+     * @var array
      */
     protected $resourceDefaults = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'];
 

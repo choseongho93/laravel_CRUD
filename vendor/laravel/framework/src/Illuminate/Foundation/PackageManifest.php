@@ -102,11 +102,11 @@ class PackageManifest
             return $this->manifest;
         }
 
-        if (! is_file($this->manifestPath)) {
+        if (! file_exists($this->manifestPath)) {
             $this->build();
         }
 
-        return $this->manifest = is_file($this->manifestPath) ?
+        return $this->manifest = file_exists($this->manifestPath) ?
             $this->files->getRequire($this->manifestPath) : [];
     }
 
@@ -154,7 +154,7 @@ class PackageManifest
      */
     protected function packagesToIgnore()
     {
-        if (! is_file($this->basePath.'/composer.json')) {
+        if (! file_exists($this->basePath.'/composer.json')) {
             return [];
         }
 

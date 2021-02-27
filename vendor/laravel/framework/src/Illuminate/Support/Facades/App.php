@@ -27,7 +27,6 @@ namespace Illuminate\Support\Facades;
  * @method static string getCachedRoutesPath()
  * @method static string getCachedServicesPath()
  * @method static string getLocale()
- * @method static string currentLocale()
  * @method static string getNamespace()
  * @method static string resourcePath(string $path = '')
  * @method static string storagePath(string $path = '')

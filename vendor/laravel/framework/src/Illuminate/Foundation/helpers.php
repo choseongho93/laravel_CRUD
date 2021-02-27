@@ -12,7 +12,7 @@ use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Foundation\Bus\PendingClosureDispatch;
+use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Foundation\Mix;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -384,9 +384,11 @@ if (! function_exists('dispatch')) {
      */
     function dispatch($job)
     {
-        return $job instanceof Closure
-                ? new PendingClosureDispatch(CallQueuedClosure::create($job))
-                : new PendingDispatch($job);
+        if ($job instanceof Closure) {
+            $job = CallQueuedClosure::create($job);
+        }
+
+        return new PendingDispatch($job);
     }
 }
 
@@ -401,6 +403,48 @@ if (! function_exists('dispatch_now')) {
     function dispatch_now($job, $handler = null)
     {
         return app(Dispatcher::class)->dispatchNow($job, $handler);
+    }
+}
+
+if (! function_exists('elixir')) {
+    /**
+     * Get the path to a versioned Elixir file.
+     *
+     * @param  string  $file
+     * @param  string  $buildDirectory
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @deprecated Use Laravel Mix instead.
+     */
+    function elixir($file, $buildDirectory = 'build')
+    {
+        static $manifest = [];
+        static $manifestPath;
+
+        if (empty($manifest) || $manifestPath !== $buildDirectory) {
+            $path = public_path($buildDirectory.'/rev-manifest.json');
+
+            if (file_exists($path)) {
+                $manifest = json_decode(file_get_contents($path), true);
+                $manifestPath = $buildDirectory;
+            }
+        }
+
+        $file = ltrim($file, '/');
+
+        if (isset($manifest[$file])) {
+            return '/'.trim($buildDirectory.'/'.$manifest[$file], '/');
+        }
+
+        $unversioned = public_path($file);
+
+        if (file_exists($unversioned)) {
+            return '/'.trim($file, '/');
+        }
+
+        throw new InvalidArgumentException("File {$file} not defined in asset manifest.");
     }
 }
 
@@ -430,6 +474,26 @@ if (! function_exists('event')) {
     function event(...$args)
     {
         return app('events')->dispatch(...$args);
+    }
+}
+
+if (! function_exists('factory')) {
+    /**
+     * Create a model factory builder for a given class and amount.
+     *
+     * @param  string  $class
+     * @param  int  $amount
+     * @return \Illuminate\Database\Eloquent\FactoryBuilder
+     */
+    function factory($class, $amount = null)
+    {
+        $factory = app(EloquentFactory::class);
+
+        if (isset($amount) && is_int($amount)) {
+            return $factory->of($class)->times($amount);
+        }
+
+        return $factory->of($class);
     }
 }
 
@@ -586,15 +650,11 @@ if (! function_exists('report')) {
     /**
      * Report an exception.
      *
-     * @param  \Throwable|string  $exception
+     * @param  \Throwable  $exception
      * @return void
      */
-    function report($exception)
+    function report(Throwable $exception)
     {
-        if (is_string($exception)) {
-            $exception = new Exception($exception);
-        }
-
         app(ExceptionHandler::class)->report($exception);
     }
 }
@@ -605,7 +665,7 @@ if (! function_exists('request')) {
      *
      * @param  array|string|null  $key
      * @param  mixed  $default
-     * @return \Illuminate\Http\Request|string|array|null
+     * @return \Illuminate\Http\Request|string|array
      */
     function request($key = null, $default = null)
     {
@@ -677,7 +737,7 @@ if (! function_exists('response')) {
     /**
      * Return a new response from the application.
      *
-     * @param  \Illuminate\Contracts\View\View|string|array|null  $content
+     * @param  \Illuminate\View\View|string|array|null  $content
      * @param  int  $status
      * @param  array  $headers
      * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
@@ -888,7 +948,7 @@ if (! function_exists('view')) {
      * @param  string|null  $view
      * @param  \Illuminate\Contracts\Support\Arrayable|array  $data
      * @param  array  $mergeData
-     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
+     * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
      */
     function view($view = null, $data = [], $mergeData = [])
     {

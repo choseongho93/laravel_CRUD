@@ -2,9 +2,8 @@
 
 namespace Illuminate\View\Engines;
 
-use Illuminate\Filesystem\Filesystem;
+use ErrorException;
 use Illuminate\View\Compilers\CompilerInterface;
-use Illuminate\View\ViewException;
 use Throwable;
 
 class CompilerEngine extends PhpEngine
@@ -24,16 +23,13 @@ class CompilerEngine extends PhpEngine
     protected $lastCompiled = [];
 
     /**
-     * Create a new compiler engine instance.
+     * Create a new Blade view engine instance.
      *
      * @param  \Illuminate\View\Compilers\CompilerInterface  $compiler
-     * @param  \Illuminate\Filesystem\Filesystem|null  $files
      * @return void
      */
-    public function __construct(CompilerInterface $compiler, Filesystem $files = null)
+    public function __construct(CompilerInterface $compiler)
     {
-        parent::__construct($files ?: new Filesystem);
-
         $this->compiler = $compiler;
     }
 
@@ -76,7 +72,7 @@ class CompilerEngine extends PhpEngine
      */
     protected function handleViewException(Throwable $e, $obLevel)
     {
-        $e = new ViewException($this->getMessage($e), 0, 1, $e->getFile(), $e->getLine(), $e);
+        $e = new ErrorException($this->getMessage($e), 0, 1, $e->getFile(), $e->getLine(), $e);
 
         parent::handleViewException($e, $obLevel);
     }

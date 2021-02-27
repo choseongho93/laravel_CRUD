@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Cron;
 
 use DateTime;
@@ -9,7 +7,7 @@ use DateTimeInterface;
 use InvalidArgumentException;
 
 /**
- * Day of week field.  Allows: * / , - ? L #.
+ * Day of week field.  Allows: * / , - ? L #
  *
  * Days of the week can be represented as a number 0-7 (0|7 = Sunday)
  * or as a three letter string: SUN, MON, TUE, WED, THU, FRI, SAT.
@@ -24,12 +22,12 @@ use InvalidArgumentException;
 class DayOfWeekField extends AbstractField
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected $rangeStart = 0;
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected $rangeEnd = 7;
 
@@ -39,7 +37,7 @@ class DayOfWeekField extends AbstractField
     protected $nthRange;
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected $literals = [1 => 'MON', 2 => 'TUE', 3 => 'WED', 4 => 'THU', 5 => 'FRI', 6 => 'SAT', 7 => 'SUN'];
 
@@ -57,39 +55,39 @@ class DayOfWeekField extends AbstractField
      *
      * @param \DateTime|\DateTimeImmutable $date
      */
-    public function isSatisfiedBy(DateTimeInterface $date, $value): bool
+    public function isSatisfiedBy(DateTimeInterface $date, $value)
     {
-        if ('?' === $value) {
+        if ($value == '?') {
             return true;
         }
 
         // Convert text day of the week values to integers
         $value = $this->convertLiterals($value);
 
-        $currentYear = (int) $date->format('Y');
-        $currentMonth = (int) $date->format('m');
-        $lastDayOfMonth = (int) $date->format('t');
+        $currentYear = $date->format('Y');
+        $currentMonth = $date->format('m');
+        $lastDayOfMonth = $date->format('t');
 
         // Find out if this is the last specific weekday of the month
         if (strpos($value, 'L')) {
-            /** @phpstan-ignore-next-line */
-            $weekday = $this->convertLiterals(substr($value, 0, strpos($value, 'L')));
+            $weekday = (int) $this->convertLiterals(substr($value, 0, strpos($value, 'L')));
             $weekday %= 7;
 
             $tdate = clone $date;
             $tdate = $tdate->setDate($currentYear, $currentMonth, $lastDayOfMonth);
             while ($tdate->format('w') != $weekday) {
                 $tdateClone = new DateTime();
-                $tdate = $tdateClone->setTimezone($tdate->getTimezone())
+                $tdate = $tdateClone
+                    ->setTimezone($tdate->getTimezone())
                     ->setDate($currentYear, $currentMonth, --$lastDayOfMonth);
             }
 
-            return (int) $date->format('j') === $lastDayOfMonth;
+            return $date->format('j') == $lastDayOfMonth;
         }
 
         // Handle # hash tokens
         if (strpos($value, '#')) {
-            [$weekday, $nth] = explode('#', $value);
+            list($weekday, $nth) = explode('#', $value);
 
             if (!is_numeric($nth)) {
                 throw new InvalidArgumentException("Hashed weekdays must be numeric, {$nth} given");
@@ -98,23 +96,23 @@ class DayOfWeekField extends AbstractField
             }
 
             // 0 and 7 are both Sunday, however 7 matches date('N') format ISO-8601
-            if ('0' === $weekday) {
+            if ($weekday === '0') {
                 $weekday = 7;
             }
 
-            $weekday = (int) $this->convertLiterals((string) $weekday);
+            $weekday = $this->convertLiterals($weekday);
 
             // Validate the hash fields
             if ($weekday < 0 || $weekday > 7) {
                 throw new InvalidArgumentException("Weekday must be a value between 0 and 7. {$weekday} given");
             }
 
-            if (!\in_array($nth, $this->nthRange, true)) {
+            if (!in_array($nth, $this->nthRange)) {
                 throw new InvalidArgumentException("There are never more than 5 or less than 1 of a given weekday in a month, {$nth} given");
             }
 
             // The current weekday must match the targeted weekday to proceed
-            if ((int) $date->format('N') !== $weekday) {
+            if ($date->format('N') != $weekday) {
                 return false;
             }
 
@@ -123,7 +121,7 @@ class DayOfWeekField extends AbstractField
             $dayCount = 0;
             $currentDay = 1;
             while ($currentDay < $lastDayOfMonth + 1) {
-                if ((int) $tdate->format('N') === $weekday) {
+                if ($tdate->format('N') == $weekday) {
                     if (++$dayCount >= $nth) {
                         break;
                     }
@@ -131,25 +129,23 @@ class DayOfWeekField extends AbstractField
                 $tdate = $tdate->setDate($currentYear, $currentMonth, ++$currentDay);
             }
 
-            return (int) $date->format('j') === $currentDay;
+            return $date->format('j') == $currentDay;
         }
 
         // Handle day of the week values
-        if (false !== strpos($value, '-')) {
+        if (strpos($value, '-')) {
             $parts = explode('-', $value);
-            if ('7' === $parts[0]) {
-                $parts[0] = 0;
-            } elseif ('0' === $parts[1]) {
-                $parts[1] = 7;
+            if ($parts[0] == '7') {
+                $parts[0] = '0';
+            } elseif ($parts[1] == '0') {
+                $parts[1] = '7';
             }
             $value = implode('-', $parts);
         }
 
         // Test to see which Sunday to use -- 0 == 7 == Sunday
-        $format = \in_array(7, array_map(function ($value) {
-            return (int) $value;
-        }, str_split($value)), true) ? 'N' : 'w';
-        $fieldValue = (int) $date->format($format);
+        $format = in_array(7, str_split($value)) ? 'N' : 'w';
+        $fieldValue = $date->format($format);
 
         return $this->isSatisfied($fieldValue, $value);
     }
@@ -157,9 +153,9 @@ class DayOfWeekField extends AbstractField
     /**
      * @inheritDoc
      *
-     * @param \DateTime|\DateTimeImmutable $date
+     * @param \DateTime|\DateTimeImmutable &$date
      */
-    public function increment(DateTimeInterface &$date, $invert = false, $parts = null): FieldInterface
+    public function increment(DateTimeInterface &$date, $invert = false)
     {
         if ($invert) {
             $date = $date->modify('-1 day')->setTime(23, 59, 0);
@@ -171,23 +167,19 @@ class DayOfWeekField extends AbstractField
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function validate(string $value): bool
+    public function validate($value)
     {
         $basicChecks = parent::validate($value);
 
         if (!$basicChecks) {
-            if ('?' === $value) {
-                return true;
-            }
-
             // Handle the # value
-            if (false !== strpos($value, '#')) {
+            if (strpos($value, '#') !== false) {
                 $chunks = explode('#', $value);
                 $chunks[0] = $this->convertLiterals($chunks[0]);
 
-                if (parent::validate($chunks[0]) && is_numeric($chunks[1]) && \in_array((int) $chunks[1], $this->nthRange, true)) {
+                if (parent::validate($chunks[0]) && is_numeric($chunks[1]) && in_array($chunks[1], $this->nthRange)) {
                     return true;
                 }
             }

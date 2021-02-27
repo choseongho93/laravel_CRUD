@@ -54,21 +54,15 @@ class ComponentMakeCommand extends GeneratorCommand
     protected function writeView()
     {
         $path = $this->viewPath(
-            str_replace('.', '/', 'components.'.$this->getView()).'.blade.php'
+            str_replace('.', '/', 'components.'.$this->getView())
         );
 
         if (! $this->files->isDirectory(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0777, true, true);
         }
 
-        if ($this->files->exists($path) && ! $this->option('force')) {
-            $this->error('View already exists!');
-
-            return;
-        }
-
         file_put_contents(
-            $path,
+            $path.'.blade.php',
             '<div>
     <!-- '.Inspiring::quote().' -->
 </div>'

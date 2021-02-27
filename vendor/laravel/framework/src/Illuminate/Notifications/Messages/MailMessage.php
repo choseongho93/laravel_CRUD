@@ -6,6 +6,7 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Mail\Markdown;
+use Traversable;
 
 class MailMessage extends SimpleMessage implements Renderable
 {
@@ -296,7 +297,9 @@ class MailMessage extends SimpleMessage implements Renderable
      */
     protected function arrayOfAddresses($address)
     {
-        return is_iterable($address) || $address instanceof Arrayable;
+        return is_array($address) ||
+               $address instanceof Arrayable ||
+               $address instanceof Traversable;
     }
 
     /**
@@ -312,10 +315,9 @@ class MailMessage extends SimpleMessage implements Renderable
             );
         }
 
-        $markdown = Container::getInstance()->make(Markdown::class);
-
-        return $markdown->theme($this->theme ?: $markdown->getTheme())
-                ->render($this->markdown, $this->data());
+        return Container::getInstance()
+            ->make(Markdown::class)
+            ->render($this->markdown, $this->data());
     }
 
     /**
@@ -327,44 +329,6 @@ class MailMessage extends SimpleMessage implements Renderable
     public function withSwiftMessage($callback)
     {
         $this->callbacks[] = $callback;
-
-        return $this;
-    }
-
-    /**
-     * Apply the callback's message changes if the given "value" is true.
-     *
-     * @param  mixed  $value
-     * @param  callable  $callback
-     * @param  callable|null  $default
-     * @return mixed|$this
-     */
-    public function when($value, $callback, $default = null)
-    {
-        if ($value) {
-            return $callback($this, $value) ?: $this;
-        } elseif ($default) {
-            return $default($this, $value) ?: $this;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Apply the callback's message changes if the given "value" is false.
-     *
-     * @param  mixed  $value
-     * @param  callable  $callback
-     * @param  callable|null  $default
-     * @return mixed|$this
-     */
-    public function unless($value, $callback, $default = null)
-    {
-        if (! $value) {
-            return $callback($this, $value) ?: $this;
-        } elseif ($default) {
-            return $default($this, $value) ?: $this;
-        }
 
         return $this;
     }

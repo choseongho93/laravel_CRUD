@@ -34,9 +34,9 @@ final class GenericObjectType extends Type
         return true;
     }
 
-    public function name(): string
+    public function getReturnTypeDeclaration(): string
     {
-        return 'object';
+        return ': ' . ($this->allowsNull ? '?' : '') . 'object';
     }
 
     public function allowsNull(): bool

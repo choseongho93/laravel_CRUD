@@ -5,6 +5,7 @@ namespace Illuminate\Encryption;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Opis\Closure\SerializableClosure;
+use RuntimeException;
 
 class EncryptionServiceProvider extends ServiceProvider
 {
@@ -76,7 +77,9 @@ class EncryptionServiceProvider extends ServiceProvider
     {
         return tap($config['key'], function ($key) {
             if (empty($key)) {
-                throw new MissingAppKeyException;
+                throw new RuntimeException(
+                    'No application encryption key has been specified.'
+                );
             }
         });
     }

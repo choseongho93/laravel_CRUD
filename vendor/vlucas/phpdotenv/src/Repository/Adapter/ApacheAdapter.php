@@ -1,40 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Dotenv\Repository\Adapter;
 
 use PhpOption\None;
-use PhpOption\Option;
-use PhpOption\Some;
 
-final class ApacheAdapter implements AdapterInterface
+class ApacheAdapter implements AvailabilityInterface, ReaderInterface, WriterInterface
 {
-    /**
-     * Create a new apache adapter instance.
-     *
-     * @return void
-     */
-    private function __construct()
-    {
-        //
-    }
-
-    /**
-     * Create a new instance of the adapter, if it is available.
-     *
-     * @return \PhpOption\Option<\Dotenv\Repository\Adapter\AdapterInterface>
-     */
-    public static function create()
-    {
-        if (self::isSupported()) {
-            /** @var \PhpOption\Option<AdapterInterface> */
-            return Some::create(new self());
-        }
-
-        return None::create();
-    }
-
     /**
      * Determines if the adapter is supported.
      *
@@ -42,48 +13,52 @@ final class ApacheAdapter implements AdapterInterface
      *
      * @return bool
      */
-    private static function isSupported()
+    public function isSupported()
     {
-        return \function_exists('apache_getenv') && \function_exists('apache_setenv');
+        return function_exists('apache_getenv') && function_exists('apache_setenv');
     }
 
     /**
-     * Read an environment variable, if it exists.
+     * Get an environment variable, if it exists.
+     *
+     * This is intentionally not implemented, since this adapter exists only as
+     * a means to overwrite existing apache environment variables.
      *
      * @param string $name
      *
-     * @return \PhpOption\Option<string>
+     * @return \PhpOption\Option<string|null>
      */
-    public function read(string $name)
+    public function get($name)
     {
-        /** @var \PhpOption\Option<string> */
-        return Option::fromValue(apache_getenv($name))->filter(static function ($value) {
-            return \is_string($value) && $value !== '';
-        });
+        return None::create();
     }
 
     /**
-     * Write to an environment variable, if possible.
+     * Set an environment variable.
      *
-     * @param string $name
-     * @param string $value
+     * Only if an existing apache variable exists do we overwrite it.
      *
-     * @return bool
+     * @param string      $name
+     * @param string|null $value
+     *
+     * @return void
      */
-    public function write(string $name, string $value)
+    public function set($name, $value = null)
     {
-        return apache_setenv($name, $value);
+        if (apache_getenv($name) !== false) {
+            apache_setenv($name, (string) $value);
+        }
     }
 
     /**
-     * Delete an environment variable, if possible.
+     * Clear an environment variable.
      *
      * @param string $name
      *
-     * @return bool
+     * @return void
      */
-    public function delete(string $name)
+    public function clear($name)
     {
-        return apache_setenv($name, '');
+        // Nothing to do here.
     }
 }

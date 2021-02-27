@@ -15,13 +15,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use LogicException;
-use Opis\Closure\SerializableClosure;
 use ReflectionFunction;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 
 class Route
 {
-    use CreatesRegularExpressionRouteConstraints, Macroable, RouteDependencyResolverTrait;
+    use Macroable, RouteDependencyResolverTrait;
 
     /**
      * The URI pattern the route responds to.
@@ -210,7 +209,7 @@ class Route
      */
     protected function isControllerAction()
     {
-        return is_string($this->action['uses']) && ! $this->isSerializedClosure();
+        return is_string($this->action['uses']);
     }
 
     /**
@@ -222,23 +221,9 @@ class Route
     {
         $callable = $this->action['uses'];
 
-        if ($this->isSerializedClosure()) {
-            $callable = unserialize($this->action['uses'])->getClosure();
-        }
-
         return $callable(...array_values($this->resolveMethodDependencies(
-            $this->parametersWithoutNulls(), new ReflectionFunction($callable)
+            $this->parametersWithoutNulls(), new ReflectionFunction($this->action['uses'])
         )));
-    }
-
-    /**
-     * Determine if the route action is a serialized Closure.
-     *
-     * @return bool
-     */
-    protected function isSerializedClosure()
-    {
-        return RouteAction::containsSerializedClosure($this->action);
     }
 
     /**
@@ -302,7 +287,7 @@ class Route
     {
         $this->compileRoute();
 
-        foreach (self::getValidators() as $validator) {
+        foreach ($this->getValidators() as $validator) {
             if (! $includingMethod && $validator instanceof MethodValidator) {
                 continue;
             }
@@ -746,8 +731,6 @@ class Route
      */
     public function prefix($prefix)
     {
-        $prefix = $prefix ?? '';
-
         $this->updatePrefixOnAction($prefix);
 
         $uri = rtrim($prefix, '/').'/'.ltrim($this->uri, '/');
@@ -853,15 +836,11 @@ class Route
     /**
      * Set the handler for the route.
      *
-     * @param  \Closure|array|string  $action
+     * @param  \Closure|string  $action
      * @return $this
      */
     public function uses($action)
     {
-        if (is_array($action)) {
-            $action = $action[0].'@'.$action[1];
-        }
-
         $action = is_string($action) ? $this->addGroupNamespaceToStringUses($action) : $action;
 
         return $this->setAction(array_merge($this->action, $this->parseAction([
@@ -931,34 +910,6 @@ class Route
         if (isset($this->action['domain'])) {
             $this->domain($this->action['domain']);
         }
-
-        return $this;
-    }
-
-    /**
-     * Get the value of the action that should be taken on a missing model exception.
-     *
-     * @return \Closure|null
-     */
-    public function getMissing()
-    {
-        $missing = $this->action['missing'] ?? null;
-
-        return is_string($missing) &&
-            Str::startsWith($missing, 'C:32:"Opis\\Closure\\SerializableClosure')
-                ? unserialize($missing)
-                : $missing;
-    }
-
-    /**
-     * Define the callable that should be invoked on a missing model exception.
-     *
-     * @param  \Closure  $missing
-     * @return $this
-     */
-    public function missing($missing)
-    {
-        $this->action['missing'] = $missing;
 
         return $this;
     }
@@ -1196,11 +1147,7 @@ class Route
     public function prepareForSerialization()
     {
         if ($this->action['uses'] instanceof Closure) {
-            $this->action['uses'] = serialize(new SerializableClosure($this->action['uses']));
-        }
-
-        if (isset($this->action['missing']) && $this->action['missing'] instanceof Closure) {
-            $this->action['missing'] = serialize(new SerializableClosure($this->action['missing']));
+            throw new LogicException("Unable to prepare route [{$this->uri}] for serialization. Uses Closure.");
         }
 
         $this->compileRoute();

@@ -5,18 +5,11 @@ namespace Illuminate\Queue;
 class WorkerOptions
 {
     /**
-     * The name of the worker.
+     * The number of seconds before a released job will be available.
      *
      * @var int
      */
-    public $name;
-
-    /**
-     * The number of seconds to wait before retrying a job that encountered an uncaught exception.
-     *
-     * @var int
-     */
-    public $backoff;
+    public $delay;
 
     /**
      * The maximum amount of RAM the worker may consume.
@@ -54,53 +47,32 @@ class WorkerOptions
     public $force;
 
     /**
-     * Indicates if the worker should stop when the queue is empty.
+     * Indicates if the worker should stop when queue is empty.
      *
      * @var bool
      */
     public $stopWhenEmpty;
 
     /**
-     * The maximum number of jobs to run.
-     *
-     * @var int
-     */
-    public $maxJobs;
-
-    /**
-     * The maximum number of seconds a worker may live.
-     *
-     * @var int
-     */
-    public $maxTime;
-
-    /**
      * Create a new worker options instance.
      *
-     * @param  string  $name
-     * @param  int  $backoff
+     * @param  int  $delay
      * @param  int  $memory
      * @param  int  $timeout
      * @param  int  $sleep
      * @param  int  $maxTries
      * @param  bool  $force
      * @param  bool  $stopWhenEmpty
-     * @param  int  $maxJobs
-     * @param  int  $maxTime
      * @return void
      */
-    public function __construct($name = 'default', $backoff = 0, $memory = 128, $timeout = 60, $sleep = 3, $maxTries = 1,
-                                $force = false, $stopWhenEmpty = false, $maxJobs = 0, $maxTime = 0)
+    public function __construct($delay = 0, $memory = 128, $timeout = 60, $sleep = 3, $maxTries = 1, $force = false, $stopWhenEmpty = false)
     {
-        $this->name = $name;
-        $this->backoff = $backoff;
+        $this->delay = $delay;
         $this->sleep = $sleep;
         $this->force = $force;
         $this->memory = $memory;
         $this->timeout = $timeout;
         $this->maxTries = $maxTries;
         $this->stopWhenEmpty = $stopWhenEmpty;
-        $this->maxJobs = $maxJobs;
-        $this->maxTime = $maxTime;
     }
 }

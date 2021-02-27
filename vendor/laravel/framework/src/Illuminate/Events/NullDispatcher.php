@@ -12,7 +12,7 @@ class NullDispatcher implements DispatcherContract
     /**
      * The underlying event dispatcher instance.
      *
-     * @var \Illuminate\Contracts\Events\Dispatcher
+     * @var \Illuminate\Contracts\Bus\Dispatcher
      */
     protected $dispatcher;
 
@@ -64,11 +64,11 @@ class NullDispatcher implements DispatcherContract
     /**
      * Register an event listener with the dispatcher.
      *
-     * @param  \Closure|string|array  $events
-     * @param  \Closure|string|null  $listener
+     * @param  string|array  $events
+     * @param  \Closure|string  $listener
      * @return void
      */
-    public function listen($events, $listener = null)
+    public function listen($events, $listener)
     {
         $this->dispatcher->listen($events, $listener);
     }

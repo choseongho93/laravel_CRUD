@@ -1,30 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Dotenv\Store\File;
 
-use Dotenv\Exception\InvalidEncodingException;
-use Dotenv\Util\Str;
 use PhpOption\Option;
 
-/**
- * @internal
- */
-final class Reader
+class Reader
 {
-    /**
-     * This class is a singleton.
-     *
-     * @codeCoverageIgnore
-     *
-     * @return void
-     */
-    private function __construct()
-    {
-        //
-    }
-
     /**
      * Read the file(s), and return their raw content.
      *
@@ -32,20 +13,17 @@ final class Reader
      * short circuit mode is enabled, then the returned array with have length
      * at most one. File paths that couldn't be read are omitted entirely.
      *
-     * @param string[]    $filePaths
-     * @param bool        $shortCircuit
-     * @param string|null $fileEncoding
-     *
-     * @throws \Dotenv\Exception\InvalidEncodingException
+     * @param string[] $filePaths
+     * @param bool     $shortCircuit
      *
      * @return array<string,string>
      */
-    public static function read(array $filePaths, bool $shortCircuit = true, string $fileEncoding = null)
+    public static function read(array $filePaths, $shortCircuit = true)
     {
         $output = [];
 
         foreach ($filePaths as $filePath) {
-            $content = self::readFromFile($filePath, $fileEncoding);
+            $content = self::readFromFile($filePath);
             if ($content->isDefined()) {
                 $output[$filePath] = $content->get();
                 if ($shortCircuit) {
@@ -60,22 +38,15 @@ final class Reader
     /**
      * Read the given file.
      *
-     * @param string      $path
-     * @param string|null $encoding
-     *
-     * @throws \Dotenv\Exception\InvalidEncodingException
+     * @param string $filePath
      *
      * @return \PhpOption\Option<string>
      */
-    private static function readFromFile(string $path, string $encoding = null)
+    private static function readFromFile($filePath)
     {
-        /** @var Option<string> */
-        $content = Option::fromValue(@\file_get_contents($path), false);
+        $content = @file_get_contents($filePath);
 
-        return $content->flatMap(static function (string $content) use ($encoding) {
-            return Str::utf8($content, $encoding)->mapError(static function (string $error) {
-                throw new InvalidEncodingException($error);
-            })->success();
-        });
+        /** @var \PhpOption\Option<string> */
+        return Option::fromValue($content, false);
     }
 }

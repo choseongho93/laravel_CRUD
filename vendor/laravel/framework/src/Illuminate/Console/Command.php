@@ -131,9 +131,7 @@ class Command extends SymfonyCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $method = method_exists($this, 'handle') ? 'handle' : '__invoke';
-
-        return (int) $this->laravel->call([$this, $method]);
+        return (int) $this->laravel->call([$this, 'handle']);
     }
 
     /**

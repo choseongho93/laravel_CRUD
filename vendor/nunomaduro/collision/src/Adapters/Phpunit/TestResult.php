@@ -1,12 +1,17 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of Collision.
+ *
+ * (c) Nuno Maduro <enunomaduro@gmail.com>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 namespace NunoMaduro\Collision\Adapters\Phpunit;
 
-use NunoMaduro\Collision\Contracts\Adapters\Phpunit\HasPrintableTestCaseName;
 use PHPUnit\Framework\TestCase;
-use Throwable;
 
 /**
  * @internal
@@ -20,13 +25,6 @@ final class TestResult
     public const WARN       = 'warnings';
     public const RUNS       = 'pending';
     public const PASS       = 'passed';
-
-    /**
-     * @readonly
-     *
-     * @var string
-     */
-    public $testCaseName;
 
     /**
      * @readonly
@@ -59,53 +57,36 @@ final class TestResult
     /**
      * @readonly
      *
-     * @var Throwable|null
+     * @var string|null
      */
-    public $throwable;
-
-    /**
-     * @readonly
-     *
-     * @var string
-     */
-    public $warning = '';
+    public $warning;
 
     /**
      * Test constructor.
+     *
+     * @param string $warning
      */
-    private function __construct(string $testCaseName, string $description, string $type, string $icon, string $color, Throwable $throwable = null)
+    private function __construct(string $description, string $type, string $icon, string $color, string $warning = null)
     {
-        $this->testCaseName = $testCaseName;
-        $this->description  = $description;
-        $this->type         = $type;
-        $this->icon         = $icon;
-        $this->color        = $color;
-        $this->throwable    = $throwable;
-
-        $asWarning = $this->type === TestResult::WARN
-             || $this->type === TestResult::RISKY
-             || $this->type === TestResult::SKIPPED
-             || $this->type === TestResult::INCOMPLETE;
-
-        if ($throwable instanceof Throwable && $asWarning) {
-            $this->warning     = trim((string) preg_replace("/\r|\n/", ' ', $throwable->getMessage()));
-        }
+        $this->description = $description;
+        $this->type        = $type;
+        $this->icon        = $icon;
+        $this->color       = $color;
+        $this->warning     = trim((string) preg_replace("/\r|\n/", ' ', (string) $warning));
     }
 
     /**
      * Creates a new test from the given test case.
      */
-    public static function fromTestCase(TestCase $testCase, string $type, Throwable $throwable = null): self
+    public static function fromTestCase(TestCase $testCase, string $type, string $warning = null): self
     {
-        $testCaseName = State::getPrintableTestCaseName($testCase);
-
         $description = self::makeDescription($testCase);
 
         $icon = self::makeIcon($type);
 
         $color = self::makeColor($type);
 
-        return new self($testCaseName, $description, $type, $icon, $color, $throwable);
+        return new self($description, $type, $icon, $color, $warning);
     }
 
     /**
@@ -113,11 +94,7 @@ final class TestResult
      */
     public static function makeDescription(TestCase $testCase): string
     {
-        $name = $testCase->getName(false);
-
-        if ($testCase instanceof HasPrintableTestCaseName) {
-            return $name;
-        }
+        $name = $testCase->getName(true);
 
         // First, lets replace underscore by spaces.
         $name = str_replace('_', ' ', $name);
@@ -129,21 +106,10 @@ final class TestResult
         $name = (string) preg_replace('/^test/', '', $name);
 
         // Removes spaces
-        $name = trim($name);
+        $name = (string) trim($name);
 
-        // Lower case everything
-        $name = mb_strtolower($name);
-
-        // Add the dataset name if it has one
-        if ($dataName = $testCase->dataName()) {
-            if (is_int($dataName)) {
-                $name .= sprintf(' with data set #%d', $dataName);
-            } else {
-                $name .= sprintf(' with data set "%s"', $dataName);
-            }
-        }
-
-        return $name;
+        // Finally, lower case everything
+        return (string) mb_strtolower($name);
     }
 
     /**
@@ -153,15 +119,15 @@ final class TestResult
     {
         switch ($type) {
             case self::FAIL:
-                return '⨯';
+                return '✕';
             case self::SKIPPED:
-                return '-';
+                return 's';
             case self::RISKY:
-                return '!';
+                return 'r';
             case self::INCOMPLETE:
-                return '…';
+                return 'i';
             case self::WARN:
-                return '!';
+                return 'w';
             case self::RUNS:
                 return '•';
             default:

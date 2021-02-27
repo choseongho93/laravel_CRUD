@@ -1,6 +1,13 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of Collision.
+ *
+ * (c) Nuno Maduro <enunomaduro@gmail.com>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 namespace NunoMaduro\Collision;
 
@@ -10,11 +17,11 @@ use Whoops\Run;
 use Whoops\RunInterface;
 
 /**
- * @internal
+ * This is an Collision Provider implementation.
  *
- * @see \Tests\Unit\ProviderTest
+ * @author Nuno Maduro <enunomaduro@gmail.com>
  */
-final class Provider implements ProviderContract
+class Provider implements ProviderContract
 {
     /**
      * Holds an instance of the Run.

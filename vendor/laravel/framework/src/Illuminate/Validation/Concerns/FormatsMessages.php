@@ -116,7 +116,7 @@ trait FormatsMessages
     }
 
     /**
-     * Get the custom error message from the translator.
+     * Get the custom error message from translator.
      *
      * @param  string  $key
      * @return string

@@ -1,13 +1,18 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of Collision.
+ *
+ * (c) Nuno Maduro <enunomaduro@gmail.com>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 namespace NunoMaduro\Collision;
 
 use NunoMaduro\Collision\Contracts\ArgumentFormatter as ArgumentFormatterContract;
 use NunoMaduro\Collision\Contracts\Highlighter as HighlighterContract;
-use NunoMaduro\Collision\Contracts\RenderlessEditor;
-use NunoMaduro\Collision\Contracts\RenderlessTrace;
 use NunoMaduro\Collision\Contracts\SolutionsRepository;
 use NunoMaduro\Collision\Contracts\Writer as WriterContract;
 use NunoMaduro\Collision\SolutionsRepositories\NullSolutionsRepository;
@@ -17,11 +22,11 @@ use Whoops\Exception\Frame;
 use Whoops\Exception\Inspector;
 
 /**
- * @internal
+ * This is an Collision Writer implementation.
  *
- * @see \Tests\Unit\WriterTest
+ * @author Nuno Maduro <enunomaduro@gmail.com>
  */
-final class Writer implements WriterContract
+class Writer implements WriterContract
 {
     /**
      * The number of frames if no verbosity is specified.
@@ -111,20 +116,15 @@ final class Writer implements WriterContract
 
         $editorFrame = array_shift($frames);
 
-        $exception = $inspector->getException();
-
-        if ($this->showEditor
-            && $editorFrame !== null
-            && !$exception instanceof RenderlessEditor
-        ) {
+        if ($this->showEditor && $editorFrame !== null) {
             $this->renderEditor($editorFrame);
         }
 
         $this->renderSolution($inspector);
 
-        if ($this->showTrace && !empty($frames) && !$exception instanceof RenderlessTrace) {
+        if ($this->showTrace && !empty($frames)) {
             $this->renderTrace($frames);
-        } elseif (!$exception instanceof RenderlessEditor) {
+        } else {
             $this->output->writeln('');
         }
     }
@@ -202,10 +202,7 @@ final class Writer implements WriterContract
                     }
 
                     foreach ($this->ignore as $ignore) {
-                        // Ensure paths are linux-style (like the ones on $this->ignore)
-                        // @phpstan-ignore-next-line
-                        $sanitizedPath = (string) str_replace('\\', '/', $frame->getFile());
-                        if (preg_match($ignore, $sanitizedPath)) {
+                        if (preg_match($ignore, $frame->getFile())) {
                             return false;
                         }
                     }
@@ -319,6 +316,15 @@ final class Writer implements WriterContract
             $this->render("<fg=yellow>$pos</><fg=default;options=bold>$file</>:<fg=default;options=bold>$line</>");
             $this->render("<fg=white>    $class$function($args)</>", false);
         }
+
+        /* Let's consider add this later...
+         * if ($vendorFrames > 0) {
+         * $this->output->write(
+         * sprintf("\n      \e[2m+%s vendor frames \e[22m\n", $vendorFrames)
+         * );
+         * $vendorFrames = 0;
+         * }.
+         */
 
         return $this;
     }

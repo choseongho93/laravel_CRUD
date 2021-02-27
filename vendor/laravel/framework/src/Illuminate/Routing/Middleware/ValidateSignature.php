@@ -12,14 +12,13 @@ class ValidateSignature
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @param  string|null  $relative
      * @return \Illuminate\Http\Response
      *
      * @throws \Illuminate\Routing\Exceptions\InvalidSignatureException
      */
-    public function handle($request, Closure $next, $relative = null)
+    public function handle($request, Closure $next)
     {
-        if ($request->hasValidSignature($relative !== 'relative')) {
+        if ($request->hasValidSignature()) {
             return $next($request);
         }
 

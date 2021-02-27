@@ -17,45 +17,16 @@ class SqlServerGrammar extends Grammar
     /**
      * The possible column modifiers.
      *
-     * @var string[]
+     * @var array
      */
     protected $modifiers = ['Increment', 'Collate', 'Nullable', 'Default', 'Persisted'];
 
     /**
      * The columns available as serials.
      *
-     * @var string[]
+     * @var array
      */
     protected $serials = ['tinyInteger', 'smallInteger', 'mediumInteger', 'integer', 'bigInteger'];
-
-    /**
-     * Compile a create database command.
-     *
-     * @param  string $name
-     * @param  \Illuminate\Database\Connection  $connection
-     * @return string
-     */
-    public function compileCreateDatabase($name, $connection)
-    {
-        return sprintf(
-            'create database %s',
-            $this->wrapValue($name),
-        );
-    }
-
-    /**
-     * Compile a drop database if exists command.
-     *
-     * @param  string $name
-     * @return string
-     */
-    public function compileDropDatabaseIfExists($name)
-    {
-        return sprintf(
-            'drop database if exists %s',
-            $this->wrapValue($name)
-        );
-    }
 
     /**
      * Compile the query to determine if a table exists.

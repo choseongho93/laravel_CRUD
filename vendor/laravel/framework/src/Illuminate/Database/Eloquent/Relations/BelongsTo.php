@@ -5,12 +5,11 @@ namespace Illuminate\Database\Eloquent\Relations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Concerns\ComparesRelatedModels;
 use Illuminate\Database\Eloquent\Relations\Concerns\SupportsDefaultModels;
 
 class BelongsTo extends Relation
 {
-    use ComparesRelatedModels, SupportsDefaultModels;
+    use SupportsDefaultModels;
 
     /**
      * The child model instance of the relation.
@@ -39,6 +38,13 @@ class BelongsTo extends Relation
      * @var string
      */
     protected $relationName;
+
+    /**
+     * The count of self joins.
+     *
+     * @var int
+     */
+    protected static $selfJoinCount = 0;
 
     /**
      * Create a new belongs to relationship instance.
@@ -223,16 +229,6 @@ class BelongsTo extends Relation
     }
 
     /**
-     * Alias of "dissociate" method.
-     *
-     * @return \Illuminate\Database\Eloquent\Model
-     */
-    public function disassociate()
-    {
-        return $this->dissociate();
-    }
-
-    /**
      * Add the constraints for a relationship query.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -270,6 +266,16 @@ class BelongsTo extends Relation
         return $query->whereColumn(
             $hash.'.'.$this->ownerKey, '=', $this->getQualifiedForeignKeyName()
         );
+    }
+
+    /**
+     * Get a relationship join table hash.
+     *
+     * @return string
+     */
+    public function getRelationCountHash()
+    {
+        return 'laravel_reserved_'.static::$selfJoinCount++;
     }
 
     /**
@@ -325,16 +331,6 @@ class BelongsTo extends Relation
     }
 
     /**
-     * Get the key value of the child's foreign key.
-     *
-     * @return mixed
-     */
-    public function getParentKey()
-    {
-        return $this->child->{$this->foreignKey};
-    }
-
-    /**
      * Get the associated key of the relationship.
      *
      * @return string
@@ -352,17 +348,6 @@ class BelongsTo extends Relation
     public function getQualifiedOwnerKeyName()
     {
         return $this->related->qualifyColumn($this->ownerKey);
-    }
-
-    /**
-     * Get the value of the model's associated key.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @return mixed
-     */
-    protected function getRelatedKeyFrom(Model $model)
-    {
-        return $model->{$this->ownerKey};
     }
 
     /**

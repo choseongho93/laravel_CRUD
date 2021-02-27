@@ -31,7 +31,7 @@ class Kernel implements KernelContract
     /**
      * The bootstrap classes for the application.
      *
-     * @var string[]
+     * @var array
      */
     protected $bootstrappers = [
         \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
@@ -68,10 +68,9 @@ class Kernel implements KernelContract
      *
      * Forces non-global middleware to always be in the given order.
      *
-     * @var string[]
+     * @var array
      */
     protected $middlewarePriority = [
-        \Illuminate\Cookie\Middleware\EncryptCookies::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
@@ -254,7 +253,7 @@ class Kernel implements KernelContract
     }
 
     /**
-     * Add a new middleware to the beginning of the stack if it does not already exist.
+     * Add a new middleware to beginning of the stack if it does not already exist.
      *
      * @param  string  $middleware
      * @return $this

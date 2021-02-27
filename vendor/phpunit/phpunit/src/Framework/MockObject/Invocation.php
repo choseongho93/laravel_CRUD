@@ -10,15 +10,13 @@
 namespace PHPUnit\Framework\MockObject;
 
 use function array_map;
-use function explode;
-use function get_class;
 use function implode;
 use function is_object;
+use function ltrim;
 use function sprintf;
 use function strpos;
 use function strtolower;
 use function substr;
-use Doctrine\Instantiator\Instantiator;
 use PHPUnit\Framework\SelfDescribing;
 use PHPUnit\Util\Type;
 use SebastianBergmann\Exporter\Exporter;
@@ -72,6 +70,8 @@ final class Invocation implements SelfDescribing
         $this->object      = $object;
         $this->proxiedCall = $proxiedCall;
 
+        $returnType = ltrim($returnType, ': ');
+
         if (strtolower($methodName) === '__tostring') {
             $returnType = 'string';
         }
@@ -120,20 +120,7 @@ final class Invocation implements SelfDescribing
             return;
         }
 
-        $returnType = $this->returnType;
-
-        if (strpos($returnType, '|') !== false) {
-            $types      = explode('|', $returnType);
-            $returnType = $types[0];
-
-            foreach ($types as $type) {
-                if ($type === 'null') {
-                    return;
-                }
-            }
-        }
-
-        switch (strtolower($returnType)) {
+        switch (strtolower($this->returnType)) {
             case '':
             case 'void':
                 return;
@@ -153,9 +140,6 @@ final class Invocation implements SelfDescribing
             case 'array':
                 return [];
 
-            case 'static':
-                return (new Instantiator)->instantiate(get_class($this->object));
-
             case 'object':
                 return new stdClass;
 
@@ -167,17 +151,16 @@ final class Invocation implements SelfDescribing
             case 'traversable':
             case 'generator':
             case 'iterable':
-                $generator = static function (): \Generator {
+                $generator = static function () {
                     yield;
                 };
 
                 return $generator();
 
-            case 'mixed':
-                return null;
-
             default:
-                return (new Generator)->getMock($this->returnType, [], [], '', false);
+                $generator = new Generator;
+
+                return $generator->getMock($this->returnType, [], [], '', false);
         }
     }
 
