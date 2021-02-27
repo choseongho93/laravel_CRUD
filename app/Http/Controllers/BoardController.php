@@ -2,20 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessPodcast;
+
 use Illuminate\Http\Request;
 use App\Board;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+
+
 
 class BoardController extends Controller
 {
     ## index page
     public function index(){
-        Cache::store('redis')->put('name2', 'Jack22', 1);
 
-        $getName = Cache::store('redis')->get('name222');
-        print_r($getName);
-//        $boards = Board::all();
-//        return view('boards.index',compact('boards'));
+        ## Cache
+//        Cache::set('names','Nate');
+//        $value = Cache::get('names');
+//        echo $value;
+
+        ## Redis
+//        Redis::set("채소", 3);
+//        $var1 = Redis::incr("채소"); // KEY 채소에 value 1증가
+//        echo $var1;
+//
+//        Redis::set("과일", 5);
+//        $var2 = Redis::incrBy("과일",30); // KEY 채소에 value 1증가
+//        echo $var2;
+//
+//        Redis::set("고기", 0.025);
+//        $var3 = Redis::incrByFloat("고기",0.015); // KEY 채소에 value 1증가
+//        echo $var3;
+
+        ## 캐시(레디스)
+//        Cache::store('redis')->put('name','Nate',600);
+//        $value = Cache::store('redis')->get('name');
+//        echo 'name : '.$value;
+//        exit;
+
+
+/***********************************************************
+ *
+************************************************************/
+
+//        $value2 = Cache::get('name');
+//        echo 'test'.$value2;
+//
+//        $value = Cache::get('name', function () {
+//           return "qwe";
+//            //return DB::table('user_info')->get();
+//        });
+//        echo 'test'.$value;
+
+//        phpinfo();
+        echo "Test";
+        exit;
+        //$boards = Board::all();
+        return view('boards.index',compact('boards'));
     }
 
     ## 생성 page
@@ -56,8 +100,18 @@ class BoardController extends Controller
         return redirect('/boards');
     }
 
-    //Cache::store('redis')->remember(function())
+    public function test(){
 
 
+//        $uid ='11';
+//        $targetContentId ='11';
+//        $type ='11';
+//        $contentId ='11';
+//        $sendPush ='11';
+//
+//        $job = new ProcessPodcast($uid,$targetContentId,$type,$contentId,$sendPush);
+//        dispatch($job)->onConnection('database');
+    }
 
 }
+

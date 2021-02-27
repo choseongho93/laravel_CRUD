@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <p>Board Index</p>
+    <p>게시판 목록</p>
     @foreach ($boards as $item)
         {{$item->title}}
     @endforeach

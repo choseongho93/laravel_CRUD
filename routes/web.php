@@ -29,17 +29,5 @@ Route::get('/boards/{board}/edit',[BoardController::class,'edit']); // 수정 pa
 Route::put('/boards/{board}', [BoardController::class,'update']); // data update
 Route::delete('/boards/{board}', [BoardController::class,'destroy']); // data delete
 
-## redis
-//Route::get('/redis', [UserController::class,'index']);
 
-
-
-## Contacts
-// Route::resource('contacts','ContactController');
-// Route::apiResource('contacts', 'ContactController');
-//Route::get('/get', [ContactController::class,'index']);
-
-
-## Users
-// Route::get('/get/user/{no}', [User::class,'getByNoData']);
-// Route::get('/get/users',[User::class,'getUsersAll']);
+Route::get('/test', [BoardController::class,'test']); // index
