@@ -29,6 +29,7 @@ class UserController extends Controller
         //
     }
 
+    ## 유저 리스트
     public function show(){
 
         try {
@@ -46,6 +47,7 @@ class UserController extends Controller
         ];
     }
 
+    ## 유저 등록
     public function store(Request $request){
 
         $name = request('name') ?? '';
@@ -76,6 +78,7 @@ class UserController extends Controller
 
     }
 
+    ## 유저 데이터 수정
     public function update(){
         $no = request('no') ?? '';
         $email = request('email') ?? '';
@@ -91,6 +94,7 @@ class UserController extends Controller
         return $result;
     }
 
+    ## 유저 데이터 삭제
     public function destroy(){
         $no = request('no') ?? '';
 
@@ -105,14 +109,15 @@ class UserController extends Controller
         return $result;
     }
 
+    ## 특정 회원 이메일 발송
     public function sendEmail(){
         $no = request('no') ?? '';
         $user = $this->GetUserEmail($no);
         SendEmailJob::dispatch($user->name, $user->email);
     }
 
+    ## 유저 정보 Get
     protected function GetUserEmail($no){
-
         $user = User::where('no', $no)->first();
         return $user;
 
