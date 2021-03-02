@@ -1,24 +1,3 @@
-# Laravel을 이용한 CRUD
-PHP 라라벨 프레임워크를 이용하여 간단한 CRUD를 구현하였습니다.<br>
-개인 local PC에서 사용하기 위함으로 작업되었습니다.
-
-## 사용 기술
-* 언어 : PHP 7.2
-* 프레임워크 : Laravel Valet(발렛)
-* 운영체제 : MacOS
-* 데이터베이스 : MySQL 5.7
-
-## 주요 기능
-1. Boards의 간단한 CRUD 구현
-2. MySQL로 데이터 적재 및 Redis를 이용하여 Cache 구현
-
-## 설치방법
-1. brew install php@7.2
-2. composer 설치 (https://getcomposer.org/download/)
-3. composer global require laravel/valet
-4. valet use php@7.2
-
-
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">

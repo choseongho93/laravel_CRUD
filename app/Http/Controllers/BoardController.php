@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessPodcast;
-
 use Illuminate\Http\Request;
-use App\Board;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-
+use App\Board;
 
 
 class BoardController extends Controller
@@ -46,19 +43,7 @@ class BoardController extends Controller
  *
 ************************************************************/
 
-//        $value2 = Cache::get('name');
-//        echo 'test'.$value2;
-//
-//        $value = Cache::get('name', function () {
-//           return "qwe";
-//            //return DB::table('user_info')->get();
-//        });
-//        echo 'test'.$value;
-
-//        phpinfo();
-        echo "Test";
-        exit;
-        //$boards = Board::all();
+        $boards = Board::all();
         return view('boards.index',compact('boards'));
     }
 
@@ -102,7 +87,7 @@ class BoardController extends Controller
 
     public function test(){
 
-
+echo "test";
 //        $uid ='11';
 //        $targetContentId ='11';
 //        $type ='11';
