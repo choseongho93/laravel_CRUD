@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\EmailController;
-
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +29,14 @@ Route::get('/boards/{board}', [BoardController::class,'show']); // 하나의 데
 Route::get('/boards/{board}/edit',[BoardController::class,'edit']); // 수정 page
 Route::put('/boards/{board}', [BoardController::class,'update']); // data update
 Route::delete('/boards/{board}', [BoardController::class,'destroy']); // data delete
+
+## User
+Route::get('/user/list',[UserController::class,'show']); // User List
+Route::post('/user/create', [UserController::class, 'store']); // User install
+Route::post('/user/{no}/update', [UserController::class, 'update']);
+Route::delete('/user/{no}/delete', [UserController::class, 'destroy']);
+Route::post('/mail/send',[UserController::class,'sendEmail']); // User List
+
 
 ## mail
 Route::get('/email',[EmailController::class, 'sendEmail']);

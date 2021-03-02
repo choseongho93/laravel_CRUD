@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Board;
 
+/*************************
+ * 간단한 게시판 CRUD (View로 확인)
+ *
+ * Class BoardController
+ * @package App\Http\Controllers
+ *************************/
+
 
 class BoardController extends Controller
 {

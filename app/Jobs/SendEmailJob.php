@@ -13,15 +13,16 @@ use App\Mail\SendMailable;
 class SendEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    protected $email, $id;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($id,$email)
     {
-        //
+        $this->id = $id;
+        $this->email = $email;
     }
 
     /**
@@ -32,8 +33,8 @@ class SendEmailJob implements ShouldQueue
     public function handle()
     {
         try {
-            $to_name = 'nate';
-            $to_email = 'choseongho93@naver.com';
+            $to_name = $this->id;
+            $to_email = $this->email;
             $data = array("name"=>$to_name);
 
             Mail::send("mail", $data, function($message) use ($to_name, $to_email) {
