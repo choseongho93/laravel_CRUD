@@ -9,6 +9,7 @@ use App\User;
 
 /*************************
  * 유저 회원 가입 (API)
+ * 유효성 검사와 세세한 부분은 제외한 간단한 CRUD
  *
  * Class UserController
  * @package App\Http\Controllers
@@ -31,7 +32,7 @@ class UserController extends Controller
 
     ## 유저 리스트
     public function show(){
-
+        //$token = csrf_token();
         try {
             $users =  User::all();
             $users_conut = User::count();

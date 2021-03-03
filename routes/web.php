@@ -22,20 +22,27 @@ Route::get('/', function () {
 });
 
 ## Board 페이지 (MySQL만을 이용하여 작업)
-Route::get('/boards', [BoardController::class,'index']); // index
-Route::get('/boards/create', [BoardController::class,'create']); // 생성페이지
-Route::post('/boards', [BoardController::class,'store']); // Data insert post
-Route::get('/boards/{board}', [BoardController::class,'show']); // 하나의 데이터 view
-Route::get('/boards/{board}/edit',[BoardController::class,'edit']); // 수정 page
-Route::put('/boards/{board}', [BoardController::class,'update']); // data update
-Route::delete('/boards/{board}', [BoardController::class,'destroy']); // data delete
+Route::prefix('/boards')->group(function(){
+    Route::get('/', [BoardController::class,'index']); // index
+    Route::get('/create', [BoardController::class,'create']); // 생성페이지
+    Route::post('/', [BoardController::class,'store']); // Data insert post
+    Route::get('/{board}', [BoardController::class,'show']); // 하나의 데이터 view
+    Route::get('/{board}/edit',[BoardController::class,'edit']); // 수정 page
+    Route::put('/{board}', [BoardController::class,'update']); // data update
+    Route::delete('/{board}', [BoardController::class,'destroy']); // data delete
+});
 
 ## User API (MySQL & Queue Redis를 이용)
-Route::get('/user/list',[UserController::class,'show']); // User List
-Route::post('/user/create', [UserController::class, 'store']); // User install
-Route::post('/user/{no}/update', [UserController::class, 'update']); // User update
-Route::delete('/user/{no}/delete', [UserController::class, 'destroy']); // User delete
-Route::post('/mail/send',[UserController::class,'sendEmail']); // mail send
+Route::prefix('/users')->group(function(){
+    Route::get('/list',[UserController::class,'show']); // User List
+    Route::post('/create', [UserController::class, 'store']); // User insert
+    Route::post('/{no}/update', [UserController::class, 'update']); // User update
+    Route::delete('/{no}/delete', [UserController::class, 'destroy']); // User delete
+
+});
+
+
+Route::post('/mails/send',[UserController::class,'sendEmail']); // mail send
 
 
 ## mail ( Queue Job Test )
