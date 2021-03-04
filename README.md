@@ -1,10 +1,36 @@
+# Laravel을 이용한 CRUD
+PHP 라라벨 프레임워크를 이용하여 간단한 CRUD를 구현하였습니다.<br>
+개인 local PC에서 사용하기 위함으로 작업되었습니다.
+
+## 사용 기술
+* 언어 : PHP 7.2
+* 프레임워크 : Laravel 8 Valet(발렛)
+* 운영체제 : MacOS
+* 데이터베이스 : MySQL 5.7
+
+## 주요 기능
+1. Boards의 간단한 CRUD 구현(view)
+2. User의 간단한 CRUD API 구현
+3. MySQL로 데이터 적재 및 Redis를 이용하여 Cache 구현
+4. Queue(redis) Job을 통해 Mail발송 구현
+5. horizon 설치
+
+## 설치방법
+1. brew install php@7.2
+2. composer 설치 (https://getcomposer.org/download/)
+3. composer global require laravel/valet
+4. valet use php@7.2
+
+
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">
 <a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
 ## About Laravel
@@ -42,6 +68,7 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 - **[Many](https://www.many.co.uk)**
 - **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
 - **[DevSquad](https://devsquad.com)**
+- **[Curotec](https://www.curotec.com/)**
 - **[OP.GG](https://op.gg)**
 
 ## Contributing
@@ -59,3 +86,15 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                                                                                                     
+~                                                                              

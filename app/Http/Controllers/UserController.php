@@ -41,7 +41,7 @@ class UserController extends Controller
                 'result' => $UserData
             ];
         } catch (Exception $e) {
-            log_message($e);
+            lㄴog_message($e);
         }
 
         return;

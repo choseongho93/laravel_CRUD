@@ -23,12 +23,12 @@ class EmailController extends Controller
 
 
 //        $to_name = 'nate';
-//        $to_email = 'choseongho93@naver.com';
+//        $to_email = '';
 //        $data = array("name"=>$to_name);
 //
 //        Mail::send("mail", $data, function($message) use ($to_name, $to_email) {
 //            $message->to($to_email, $to_name) ->subject("안내문");
-//            $message->from("choseongho93@gmail.com", "루나소프트");
+//            $message->from("", "");
 //        });
 //
 //        return 'Email sent Successfully';

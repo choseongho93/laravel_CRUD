@@ -42,7 +42,7 @@ class SendEmailJob implements ShouldQueue
 
             Mail::send("mail", $data, function($message) use ($to_name, $to_email) {
                 $message->to($to_email, $to_name) ->subject("안내문");
-                $message->from("choseongho93@gmail.com", "루나소프트");
+                $message->from("", "");
             });
 
         }catch (Exception $e){
