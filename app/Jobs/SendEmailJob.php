@@ -32,6 +32,9 @@ class SendEmailJob implements ShouldQueue
      */
     public function handle()
     {
+
+
+
         try {
             $to_name = $this->id;
             $to_email = $this->email;

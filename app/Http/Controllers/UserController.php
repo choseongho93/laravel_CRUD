@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Board;
 use App\Jobs\SendEmailJob;
 use Illuminate\Http\Request;
-use App\User;
+use App\Models\UserModel;
 
 /*************************
  * 유저 회원 가입 (API)
@@ -17,7 +17,6 @@ use App\User;
 
 class UserController extends Controller
 {
-    protected $bool = 0;
 
     /**
      * Handle the incoming request.
@@ -31,68 +30,53 @@ class UserController extends Controller
     }
 
     ## 유저 리스트
-    public function show(){
-        //$token = csrf_token();
+    public function show()
+    {
+        /*$token = csrf_token(); echo $token;*/
+
         try {
-            $users =  User::all();
-            $users_conut = User::count();
-        }catch (Exception $e){
-            $this->bool = -1;
+            $UserData = UserModel::getAllData();
+            $UserData ? $UserData : '';
+            return [
+                'result' => $UserData
+            ];
+        } catch (Exception $e) {
+            log_message($e);
         }
 
-        return [
-            'result' => $users,
-            'error_message' => $users ? '' : '처리중 오류가 발생했습니다. 다시 시도해주시기 바랍니다.',
-            'code' => $users ? $this->bool : -1,
-            'count'=>$users_conut
-        ];
+        return;
     }
 
     ## 유저 등록
     public function store(Request $request){
-
-        $name = request('name') ?? '';
-        $passwd = request('passwd') ?? '';
-        $email = request('email') ?? '';
+        $user = [];
+        $user['name'] = request('name') ?? '';
+        $user['passwd'] = request('passwd') ?? '';
+        $user['email'] = request('email') ?? '';
 
         try {
-            $user = new User;
-
-            $user->name = $name;
-            $user->passwd = $passwd;
-            $user->email = $email;
-
-            $user->save();
-
-//            $user = User::create([
-//                'name'=>$name,
-//                'passwd'=>$passwd,
-//                'email'=>$email
-//            ]);
+            $bool = UserModel::insertData($user);
+            return $bool;
         }catch (Exception $e){
-            $this->bool = -1;
+            log_message($e);
         }
 
-        $result = $user ? $this->bool : -1;
-
-        return $result;
-
+        return;
     }
 
     ## 유저 데이터 수정
     public function update(){
-        $no = request('no') ?? '';
-        $email = request('email') ?? '';
+        $user = [];
+        $user['name'] = request('name') ?? '';
+        $user['email'] = request('email') ?? '';
 
         try {
-            $user = User::where('no', '=', $no)->update(['email' => $email]);
+            $bool = UserModel::updateData($user);
+            return $bool;
         }catch (Exception $e){
-            $this->bool = -1;
+            log_message($e);
         }
-
-        $result = $user ? $this->bool : -1;
-
-        return $result;
+        return;
     }
 
     ## 유저 데이터 삭제
@@ -100,27 +84,21 @@ class UserController extends Controller
         $no = request('no') ?? '';
 
         try {
-            $user = User::where('no', '=', $no)->delete();
+            $bool = UserModel::deleteData($no);
+            return $bool;
         }catch (Exception $e){
-            $this->bool = -1;
+            log_message($e);
         }
 
-        $result = $user ? $this->bool : -1;
-
-        return $result;
+        return;
     }
 
     ## 특정 회원 이메일 발송
     public function sendEmail(){
         $no = request('no') ?? '';
-        $user = $this->GetUserEmail($no);
-        SendEmailJob::dispatch($user->name, $user->email);
-    }
-
-    ## 유저 정보 Get
-    protected function GetUserEmail($no){
-        $user = User::where('no', $no)->first();
-        return $user;
+        $user = UserModel::getUserEmail($no); // 특정 유저 Data 가져오기
+        SendEmailJob::dispatch($user[0]->name, $user[0]->email);
 
     }
+
 }

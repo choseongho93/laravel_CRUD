@@ -32,12 +32,12 @@ Route::prefix('/boards')->group(function(){
     Route::delete('/{board}', [BoardController::class,'destroy']); // data delete
 });
 
-## User API (MySQL & Queue Redis를 이용)
+## UserModel API (MySQL & Queue Redis를 이용)
 Route::prefix('/users')->group(function(){
-    Route::get('/list',[UserController::class,'show']); // User List
-    Route::post('/create', [UserController::class, 'store']); // User insert
-    Route::post('/{no}/update', [UserController::class, 'update']); // User update
-    Route::delete('/{no}/delete', [UserController::class, 'destroy']); // User delete
+    Route::get('/list',[UserController::class,'show']); // UserModel List
+    Route::post('/create', [UserController::class, 'store']); // UserModel insert
+    Route::post('/{no}/update', [UserController::class, 'update']); // UserModel update
+    Route::delete('/{no}/delete', [UserController::class, 'destroy']); // UserModel delete
 
 });
 
