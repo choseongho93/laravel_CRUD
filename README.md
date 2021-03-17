@@ -9,8 +9,8 @@ PHP 라라벨 프레임워크를 이용하여 간단한 CRUD를 구현하였습�
 * 데이터베이스 : MySQL 5.7
 
 ## 주요 기능
-1. Boards의 간단한 CRUD 구현(view)
-2. User의 간단한 CRUD API 구현
+1. Boards의 간단한 CRUD 구현 (view)
+2. User의 간단한 CRUD api 구현 (API)
 3. MySQL로 데이터 적재 및 Redis를 이용하여 Cache 구현
 4. Queue(redis) Job을 통해 Mail발송 구현
 5. horizon 설치
